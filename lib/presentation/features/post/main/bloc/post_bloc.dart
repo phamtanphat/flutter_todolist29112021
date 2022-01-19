@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_todolist29112021/data/datasources/remote/app_resources.dart';
+import 'package:flutter_todolist29112021/data/model/post_model.dart';
 import 'package:flutter_todolist29112021/presentation/features/post/main/bloc/post_events.dart';
 import 'package:flutter_todolist29112021/presentation/features/post/main/bloc/post_states.dart';
 import 'package:flutter_todolist29112021/presentation/features/post/main/repositories/post_repository.dart';
@@ -28,9 +30,14 @@ class PostBloc{
   void _handleFetchList(FetchListPostEvent event) async{
     try{
       Response response = await _postRepository.getListPost();
-      print(response.toString());
+      if(response.statusCode == 200){
+        List<PostModel> listModel = (response.data as List).map((e){
+          return PostModel.fromJson(e);
+        }).toList();
+        _stateController.sink.add(PostResult(data: AppResources.success(listModel)));
+      }
     }catch(e){
-      print(e.toString());
+      _stateController.sink.add(PostResult(data: AppResources.error(e.toString())));
     }
   }
 
