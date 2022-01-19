@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_todolist29112021/data/datasources/remote/api/post_request_api.dart';
-import 'package:flutter_todolist29112021/data/model/post_model.dart';
-import 'package:flutter_todolist29112021/presentation/features/post/main/bloc/post_states.dart';
 import 'package:flutter_todolist29112021/presentation/features/post/main/repositories/post_repository.dart';
 import 'package:provider/provider.dart';
 
 import 'bloc/post_bloc.dart';
 import 'bloc/post_events.dart';
+import 'bloc/post_states.dart';
 
 class PostScreen extends StatefulWidget {
 
@@ -65,32 +65,33 @@ class _PostContainerWidgetState extends State<PostContainerWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    bloc.event.add(FetchListPostEvent());
-
-    Future.delayed(Duration(seconds: 4) ,() => bloc.event.add(FetchListPostEvent()));
+    bloc.add(FetchListPostEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<PostStateBase>(
-      initialData: null,
-      stream: bloc.state,
-      builder: (context, snapshot) {
-        if(snapshot.data is PostResult){
-          return (snapshot.data as PostResult)
-              .data
-              .when(
+    return BlocConsumer<PostBloc,PostStateBase>(
+        bloc: bloc,
+        builder: (context , state){
+          if(state is PostResult){
+            return state.data
+                .when(
                 success: (postModel){
-                  return Text(postModel[0].userId.toString());
+                  return Text(postModel[0].title.toString());
                 },
                 error: ([String? message]){
                   return Text(message!);
                 }
-          );
+            );
+          }
+          return CircularProgressIndicator();
+        },
+        listener: (context , state){
+
         }
-        return CircularProgressIndicator();
-      },
     );
   }
+
+
 }
 
